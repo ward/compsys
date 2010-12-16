@@ -57,6 +57,7 @@ endm
 ;const defines
 rectx = 100
 recty =10
+;eerste circel
 circleradius = 16
 rectcolor =50
 ;-------------------------------------------------------------------------
@@ -69,11 +70,13 @@ rectcolor =50
 .DATA ;data segment, static variables
 oldvideomode db ?
 ;rectangle db rectwidth dup (rectcolor),(rectheight-2) dup (rectcolor,(rectwidth-2) dup (0),rectcolor),rectwidth dup (rectcolor)
-rectangle db (4*circleradius*circleradius) dup (3)
+rectangle db (4*circleradius*circleradius) dup (0)
 
 ; Voor printint
 powersoften dw 10000,1000,100,10,1
 maxint db "-32768$"
+midcircelx dw 160
+midcircely dw 160
 
 .CODE ;code segment
 .STARTUP ; start main, sets ds to beginning of data segment, updates ss to ds and adjusts sp acordingly
@@ -82,8 +85,7 @@ maxint db "-32768$"
 ;	add bx,ax
 ;	mov al,rectcolor
 ;	mov [bx],al
-	call makecircle
-	call vgamodeex1 
+        call beweging 
 .EXIT ; end main/exit to dos
  ;procedures
  
@@ -168,6 +170,26 @@ makecircleskipcolor:
 	;return, removing parameter
 	ret
 makecircle endp
+
+beweging proc near
+	push bp
+	mov bp, sp
+        push ax
+        push bx
+        push cx
+        push dx
+loop1:   
+        mov ax, midcircelx
+        add ax,1
+        mov midcircelx, ax
+        mov ax, midcircely
+        add ax, 1
+        mov midcircely, ax
+        call makecircle
+        call vgamodeex1
+        jmp loop1
+        ret
+beweging endp
  
 vgamodeex1 proc near
   ;save dynamic link
@@ -191,7 +213,7 @@ vgamodeex1 proc near
   mov es,di
   mov di,offset videobuffer
   ;adjust di to account for rectx,recty
-  add di,rectx+320*recty
+  add di,(midcircelx-circleradius)+320*(midcircely-circleradius)
   ;init cx for loop (height of rectangle)
   mov cx,2*circleradius
 vgamodeex1_vertical:
