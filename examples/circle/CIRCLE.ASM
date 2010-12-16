@@ -213,7 +213,7 @@ vgamodeex1 proc near
   mov es,di
   mov di,offset videobuffer
   ;adjust di to account for rectx,recty
-  add di,(midcircelx-circleradius)+320*(midcircely-circleradius)
+  add di,(midcircelx-circleradius)+320*(midcircely-circleradius) ;moet aangepast worden
   ;init cx for loop (height of rectangle)
   mov cx,2*circleradius
 vgamodeex1_vertical:
