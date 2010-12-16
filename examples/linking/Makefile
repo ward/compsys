@@ -1,4 +1,4 @@
-PRINT.EXE: lf.obj mylib.a
+PRINT.EXE: lf.obj main.obj mylib.a
 	ML MAIN.OBJ LF.OBJ /Fe PRINT.EXE
 lf.obj: lf.asm
 	ML /c lf.asm
