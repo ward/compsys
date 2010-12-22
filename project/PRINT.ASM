@@ -6,12 +6,12 @@
 public prints
 public print
 public newline
+public getline
 
 
 .STACK 1024
 
 .DATA
-message	db	"Welcome to this world.","$"
 
 .CODE
 
@@ -27,7 +27,7 @@ print	proc	near
 print	endp
 
 ; Prints a string
-; Input: Begin address of string
+; Input: Begin address of string, note that string has to end in $
 prints	proc	near
 	push	bp
 	mov	bp,sp
@@ -56,5 +56,36 @@ newline	proc	near
 	pop	ax
 	ret
 newline endp
+
+; Gets line (70 characters max)
+; Parameter: address of buffer
+; Result: buffer has:
+;	first byte: number indicating max characters that were allowed
+;	second byte: n amount of characters read in
+getline	proc	near
+	push	bp
+	mov	bp,sp
+	push	ax
+	push	bx
+	push	dx
+
+	mov	dx,[bp+4]
+	
+	; Set max characters to get in first byte of buffer
+	mov	al,71
+	mov	bx,dx ; Need base register to use like this:
+	mov	[bx],al
+	
+	; Call the software interrupt
+	; String in buffer mentioned at bp+4
+	mov	ah,0ah
+	int	21h
+	
+	pop	dx
+	pop	bx
+	pop	ax
+	pop	bp
+	ret	2
+getline	endp
 
 end
