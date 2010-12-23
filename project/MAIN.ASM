@@ -29,6 +29,7 @@ extern	getline:proto
 	call	newline
 	
 	; print 3rd character
+	; if valid
 	mov	bx,offset buffer
 	mov	dl,[bx+4]
 	call	print

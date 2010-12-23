@@ -6,6 +6,8 @@ MAIN.OBJ:
 	ml /c MAIN.ASM
 PRINT.OBJ: PRINT.ASM
 	ml /c PRINT.ASM
+#STOI.OBJ:
+#	ml /c STOI.ASM
 clean:
 	del *.OBJ
 	del *.EXE
