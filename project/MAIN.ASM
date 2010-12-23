@@ -16,6 +16,8 @@ extern	print:proto
 extern	prints:proto
 extern	newline:proto
 extern	getline:proto
+extern	stoi:proto
+;extern	isdigit:proto
 
 .STARTUP
 	lea	dx,message
@@ -28,10 +30,13 @@ extern	getline:proto
 	call	getline
 	call	newline
 	
-	; print 3rd character
-	; if valid
+	; return value
+	sub	sp,2
 	mov	bx,offset buffer
-	mov	dl,[bx+4]
+	add	bx,2
+	push	bx
+	call	stoi
+	pop	dx
 	call	print
 .EXIT
 

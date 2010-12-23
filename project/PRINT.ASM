@@ -81,6 +81,8 @@ getline	proc	near
 	mov	ah,0ah
 	int	21h
 	
+	; Todo: set first byte after last character to 0 (or $)
+	
 	pop	dx
 	pop	bx
 	pop	ax
