@@ -53,32 +53,38 @@ notplus:
 	; We will keep current in [bx] at all time
 	mov	al,[bx]
 	call	isdigit
-	jc	finish
+	jc	dosign
 	; It is a digit, so multiply current number by 10, then add it
 	; (converting char to int before adding)
 	mov	ax,[bp+6]
 	mov	dx,10
 	mul	dx ; QUESTION: Is this interpreted as 8 or 16 bit? -> Need 16
 	; Overflow means we end
-	jo	finish
+	jo	dosign
 	; Add current
 	mov	[bp+6],ax
 	mov	al,[bx]	; We only want one character
 	cbw		; Sign extend al to ax
 	sub	ax,48
 	add	[bp+6],ax
-	jo	finish
+	jo	dosign
 	; Nothing went wrong, repeat for next character
 	add	bx,1
 	jmp	notplus
 	
 	; Will finish in case of:
 	;  * overflow
-	;  * invalid character
-	;  * $ found (denoting end of string)
-finish:
-	; Need to multiply by sign still
-	
+	;  * invalid character (non number)
+dosign:
+	mov	ax,1
+	cmp	[bp-8],ax
+	jz	finish
+	; sign change in two's complement means inverting and then adding 1
+	mov	ax,[bp+6]
+	not	ax
+	add	ax,1
+	mov	[bp+6],ax
+finish:	
 	; remove local var
 	add	sp,2
 	pop	dx

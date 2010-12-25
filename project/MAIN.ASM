@@ -17,7 +17,6 @@ extern	prints:proto
 extern	newline:proto
 extern	getline:proto
 extern	stoi:proto
-;extern	isdigit:proto
 
 .STARTUP
 	lea	dx,message
@@ -36,8 +35,7 @@ extern	stoi:proto
 	add	bx,2
 	push	bx
 	call	stoi
-	pop	dx
-	call	print
+	;pop	dx
 .EXIT
 
 end
