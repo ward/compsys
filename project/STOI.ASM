@@ -44,8 +44,8 @@ stoi	proc	near
 	jmp	notplus
 notminus:
 	; 43 is +
-	mov	ax,43
-	cmp	[bx],ax
+	mov	al,43
+	cmp	[bx],al
 	jnz	notplus
 	add	bx,1
 notplus:
