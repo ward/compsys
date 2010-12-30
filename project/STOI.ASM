@@ -2,7 +2,6 @@
 
 ; exports
 public	stoi
-;public	isdigit
 
 .STACK 1024
 
