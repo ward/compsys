@@ -1,13 +1,14 @@
+objects = MAIN.OBJ PRINT.OBJ STOI.OBJ BALL.OBJ
+
 all: START.EXE
 
-START.EXE: MAIN.OBJ PRINT.OBJ STOI.OBJ
-	ml MAIN.OBJ PRINT.OBJ STOI.OBJ /Fe START.EXE
+START.EXE: $(objects)
+	ml $(objects) /Fe START.EXE
+# make knows how to compile these
 MAIN.OBJ: MAIN.ASM
-	ml /c MAIN.ASM
 PRINT.OBJ: PRINT.ASM
-	ml /c PRINT.ASM
 STOI.OBJ: STOI.ASM
-	ml /c STOI.ASM
+BALL.OBJ: BALL.ASM
 clean:
 	del *.OBJ
 	del *.EXE

@@ -28,16 +28,24 @@ buffer	db	100 dup (0)
 
 oldvidmode	db	?
 
+; for testing
+ball1	db	18 dup (0)
+
 .CODE
 ;===============
 ;=== Imports ===
 ;===============
 
+; print
 extern	print:proto
 extern	prints:proto
 extern	newline:proto
 extern	getline:proto
+; stoi
 extern	stoi:proto
+; ball
+extern	ball_new:proto
+extern	ball_draw:proto
 
 .STARTUP
 	;lea	dx,message
@@ -58,9 +66,32 @@ extern	stoi:proto
 	;call	stoi
 	;pop	dx
 	
+	
+	; Create a ball
+	lea	ax,message
+	push	ax
+	mov	ax,160	; x
+	push	ax
+	mov	ax,100	; y
+	push	ax
+	mov	ax,10	; rico_x
+	push	ax
+	mov	ax,1	; rico_y
+	push	ax
+	mov	ax,33	;radius
+	push	ax
+	mov	ax,200	;colour
+	push	ax
+	call	ball_new
 	; Try some drawing
 	setvideomode	13h,oldvidmode
 	
+	lea	ax,message
+	push	ax
+	call	ball_draw
+
+
+; draw a dot in bottom left corner
 	; Screen
 	mov	dx,0A000h
 	mov	es,dx
@@ -70,6 +101,7 @@ extern	stoi:proto
 	mov	ax,199
 	mul	di
 	mov	di,ax
+
 	  ;wait for vblank to write to video ram
   mov dx, 03dah ; VGA status port             
 drawscreen_wait1: ;if in vblank, wait until vblank finishes

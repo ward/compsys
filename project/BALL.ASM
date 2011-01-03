@@ -4,6 +4,8 @@
 .MODEL compact
 
 ; exports
+public	ball_new
+public	ball_draw
 
 .STACK 1024
 
@@ -22,19 +24,36 @@ ball_new	proc	near
 	push	dx
 
 	; Begin address in bx
-	mov	bx,[bp+14]
+	mov	bx,[bp+16]
 
 	; Moving things into the reserved space
-	mov	[bx],[bp+14] ; curr_x
-	mov	[bx+2],[bp+12] ; curr_y
-	mov	[bx+4],[bp+14] ; start_x
-	mov	[bx+6],[bp+12] ; start_y
+	; curr_x
+	mov	ax,[bp+14]
+	mov	[bx],ax
+	; curr_y
+	mov	ax,[bp+12]
+	mov	[bx+2],ax
+	; start_x
+	mov	ax,[bp+14]
+	mov	[bx+4],ax
+	; start_y
+	mov	ax,[bp+12]
+	mov	[bx+6],ax
+	; t, internal counter
 	mov	ax,0
-	mov	[bx+8],ax ; t, internal counter
-	mov	[bx+10],[bp+10] ; rico_x
-	mov	[bx+12],[bp+8] ; rico_y
-	mov	[bx+14],[bp+6] ; radius
-	mov	[bx+16],[bp+4] ; colour
+	mov	[bx+8],ax
+	; rico_x
+	mov	ax,[bp+10]
+	mov	[bx+10],ax
+	; rico_y
+	mov	ax,[bp+8]
+	mov	[bx+12],ax
+	; radius
+	mov	ax,[bp+6]
+	mov	[bx+14],ax
+	; colour
+	mov	ax,[bp+4]
+	mov	[bx+16],ax
 
 	pop	dx
 	pop	cx
@@ -51,11 +70,33 @@ ball_new	endp
 
 ; Something here to grab the curr x etc from "inside"
 ; Interaction!
-; eg: ball_get_x, ball_get_y, ball_get_size, ...
+; eg: ball_get_x, ball_get_y, ball_get_r, ...
 ; Make them behave like this:
-; Parameter in ax
+; Parameter (ball's address) in ax
 ; Call function
 ; Result in ax
+
+ball_get_x	proc	near
+	mov	bx,ax
+	mov	ax,[bx]
+	ret
+ball_get_x	endp
+ball_get_y	proc	near
+	mov	bx,ax
+	mov	ax,[bx+2]
+	ret
+ball_get_y	endp
+ball_get_r	proc	near
+	mov	bx,ax
+	mov	ax,[bx+14]
+	ret
+ball_get_r	endp
+ball_get_c	proc	near
+	mov	bx,ax
+	mov	ax,[bx+16]
+	ret
+ball_get_c	endp
+
 
 
 ; We'll draw straight to the screen
@@ -104,12 +145,15 @@ iterdraw_x:
 	; Now (r - y)^2
 	mov	ax,[bp+4]
 	call	ball_get_r
-	mov	bx,[sp]	; y was pushed on the stack at the begining of iter y!
+	mov	bx,sp
+	mov	bx,[bx]	; y was pushed on the stack at the begining of iter y!
 	sub	al,bl
 	imul	al
 	; Add those two together, it has to be smaller or equal to r^2
 	add	ax,dx
-	cmp	ax,[sp+2]	; r^2 was pushed on the stack
+	; r^2 was pushed on the stack and is at sp+2 now
+	mov	bx,sp
+	cmp	ax,[bx+2]
 	jg	draw_continue	; This point wasn't part of the cirle
 
 	; Now we colour the appropriate dot on the screen.
@@ -124,7 +168,8 @@ iterdraw_x:
 	; 	and 0 <= y_m + y - r < 200
 
 	; First, let's get y_m + y - r
-	mov	dx,[sp]	; y
+	mov	bx,sp
+	mov	dx,[bx]	; y
 	mov	ax,[bp+4]
 	call	ball_get_y
 	add	dx,ax	; y + y_m
@@ -190,3 +235,5 @@ draw_continue:
 	pop	bp
 	ret	2
 ball_draw	endp
+
+end
