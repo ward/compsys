@@ -6,6 +6,7 @@
 ; exports
 public	ball_new
 public	ball_draw
+public  ball_move
 
 .STACK 1024
 
