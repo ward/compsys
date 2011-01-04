@@ -6,6 +6,7 @@
 ; exports
 public	ball_new
 public	ball_draw
+public  ball_move
 
 .STACK 1024
 
@@ -235,5 +236,106 @@ draw_continue:
 	pop	bp
 	ret	2
 ball_draw	endp
+
+ball_move proc near
+	push bp
+	push ax
+        push bx
+	push cx
+	push dx
+        mov bp, sp
+counter:
+	mov bx, [bp+4]  ;neemt het adres van de bal
+	mov ax, [bx+8]  ;neemt de counter t
+	inc ax ;verhoogt de counter met 1
+	mov [bx+8], ax
+positie_x:
+	mov dx, [bx+10] ;neemt rico x
+	mul dx ;ax*dx zit in ax
+        mov cx, [bx+4] ;neem start-x van de bal
+        add ax, cx    ;in ax zit t*rico_x + x_0
+        push ax
+        push bx
+	push dx
+        call check_ball_x
+	pop dx
+        pop bx
+        pop ax
+positie_y:
+	mov ax, [bx+8]  ;neemt de counter
+	mov dx, [bx+12] ;neemt rico y
+	mul dx          ;ax= t*rico_y
+	mov cx, [bx+6]  ;cx bevat start-y van de bal
+	add ax, cx      ;ax= t*rico_y + y_0
+	push ax
+	push bx 
+	push dx
+        call check_ball_y
+	pop dx
+	pop bx
+	pop ax
+ball_continue:
+	pop dx
+	pop cx
+	pop bx
+	pop ax
+	pop bp
+ball_move	endp
+
+check_ball_x proc near
+first:
+	pop dx
+	pop bx
+	pop ax
+	cmp ax, 0
+	jae second ;als x > 0
+        jb false   ;als x < 0
+second:
+	cmp ax, 320
+	ja false ;als x > 320
+	mov [bx], ax  ;verandert x met de nieuwe positie
+        jmp endg
+false:
+	neg dx  ;rico van x negatief maken
+	mov [bx+10], dx ;nieuwe rico veranderen
+	mov ax, 0
+	mov [bx+8], ax   ;t resetten op 0
+	mov ax, [bx]
+	mov [bx+4], ax  ;verandert de start-x met de waarde van de huidige x
+	mov ax, [bx+2]
+	mov [bx+6], ax  ;verandert de start-y met de waarde van de huidige y
+endg:
+	push ax
+	push bx
+	push dx
+check_ball_x	endp
+
+check_ball_y proc near
+first:
+	pop dx
+	pop bx
+	pop ax
+	cmp ax, 0
+	jae second   ;als y >= 0
+	jb false     ;als y < 0
+second:
+	cmp ax, 200
+	ja false  ;als y > 200
+	mov [bx+2], ax  ;verandert y met de nieuwe positie
+	jmp endg
+false:
+	neg dx          ;rico van y negatief maken
+	mov [bx+12], dx ;nieuwe rico veranderen
+	mov ax, 0
+	mov [bx+8], ax   ;t resetten op 0
+	mov ax, [bx]
+	mov [bx+4], ax ;verandert de start-x met de waarde van de huidige x
+	mov ax, [bx+2]
+	mov [bx+6], ax ;verandert de start-y met de waarde van de huidige y
+endg:
+	push ax
+	push bx
+	push dx
+check_ball_y	endp
 
 end
