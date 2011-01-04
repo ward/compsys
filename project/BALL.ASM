@@ -7,6 +7,7 @@
 public	ball_new
 public	ball_draw
 public  ball_move
+public  botsing
 
 .STACK 1024
 
