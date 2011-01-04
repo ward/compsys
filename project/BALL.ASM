@@ -236,4 +236,36 @@ draw_continue:
 	ret	2
 ball_draw	endp
 
+ball_move proc near
+	push bp
+	push ax
+        push bx
+	push cx
+	push dx
+        mov bp, sp
+counter:
+	mov bx, [bp+4]  ;neemt het adres van de bal
+	mov ax, [bx+8]  ;neemt de counter t
+	inc ax ;verhoogt de counter met 1
+	mov [bx+8], ax
+positie_x:
+	mov dx, [bx+10] ;neemt rico x
+	mul dx ;ax*dx zit in ax
+        mov cx, [bx+4] ;neem start-x van de bal
+        add ax, cx    ;in ax zit t*rico_x + x_0
+        mov [bx], ax  ;verandert x met de nieuwe positie
+positie_y:
+	mov ax, [bx+8]  ;neemt de counter
+	mov dx, [bx+12] ;neemt rico y
+	mul dx          ;ax= t*rico_y
+	mov cx, [bx+6]  ;cx bevat start-y van de bal
+	add ax, cx      ;ax= t*rico_y + y_0
+	mov [bx+2], ax
+ball_continue:
+	pop dx
+	pop cx
+	pop bx
+	pop ax
+	pop bp
+ball_move	endp
 end
