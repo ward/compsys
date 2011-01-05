@@ -247,9 +247,10 @@ get_colour:
 	; DEBUG
 loop_draw:
 	blankscreenmode13
-	; Note that the address of ball n is at: ary_balls[2n]
+	; Note that the address of ball n is at: ary_balls[2n] for n=0..amt-1
 	mov	bx,amt_balls
 	add	bx,amt_balls
+	sub	bx,2	; Because indices start counting at 0
 loop_draw_ball:
 	mov	ax,ary_balls[bx]
 	push	ax
