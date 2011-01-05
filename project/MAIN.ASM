@@ -78,7 +78,8 @@ input_buffer	db	100 dup (0)
 ; Needed to save
 amt_balls	dw	(0)
 ; Will hold the addresses to the memory blocks
-ary_balls	dw	AMT_BALLS_MAX dup (0)
+; Add +1 to have 0 signify the end of the array.
+ary_balls	dw	(AMT_BALLS_MAX+1) dup (0)
 ary_balls_data	db	AMT_BALLS_MAX dup (18 dup (0))
 
 ; Something to store the old video mode when switching to drawing
@@ -102,6 +103,7 @@ extern	stoi:proto
 extern	ball_new:proto
 extern	ball_draw:proto
 extern	ball_move:proto
+extern	ball_bounce:proto
 
 
 .STARTUP
@@ -172,10 +174,10 @@ create_ball:
 	; address
 	push	ax
 	; x
-	mov	ax,cx
+	mov	ax,160
 	push	ax
 	; y
-	mov	ax,cx
+	mov	ax,100
 	push	ax
 	; rico_x
 	mov	ax,cx
@@ -261,6 +263,11 @@ loop_draw_ball:
 	sub	bx,2
 	cmp	bx,0
 	jns	loop_draw_ball
+	
+	; Check collisions
+	mov	ax,offset ary_balls
+	push	ax
+	call	ball_bounce
 	
 	; Get keystroke
 	mov	ah,00h

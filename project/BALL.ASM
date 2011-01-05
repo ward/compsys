@@ -7,6 +7,7 @@
 public	ball_new
 public	ball_draw
 public  ball_move
+public	ball_bounce
 public  botsing
 
 .STACK 1024
@@ -305,6 +306,124 @@ ball_calc_coor	proc	near
 	pop	bp
 	ret	2
 ball_calc_coor	endp
+
+
+; This will handle all the collisions.
+; Parameter is the begin address of an array of addresses to balls.
+ball_bounce	proc	near
+	push	bp
+	mov	bp,sp
+	push	ax
+	push	bx
+	push	cx
+	push	dx
+
+	mov	bx,[bp+4]
+	; We will just walk through the array till we reach an element that
+	; is 000000.
+bounce_loop:
+	mov	ax,[bx]
+	cmp	ax,0
+	jz	done_all
+	; Save the current position in the array
+	push	bx
+	; Now we have the address of the ball in bx
+	mov	bx,ax
+
+	; === WALLS
+	; == Left: Collision if x <= r
+bounce_left_wall:
+	mov	ax,[bx]	; x
+	mov	dx,[bx+14]	; r
+	; x <= r iif r - x >= 0
+	cmp	dx,ax
+	js	bounce_top_wall
+	; Negate rico_x
+	mov	ax,[bx+10]
+	neg	ax
+	mov	[bx+10],ax
+	call	ball_reset
+	
+	; == Top: Collision if y <= r
+bounce_top_wall:
+	mov	ax,[bx+2]	; y
+	mov	dx,[bx+14]	; r
+	; y <= r iif r - x >= 0
+	cmp	dx,ax
+	js	bounce_right_wall
+	; Negate rico_y
+	mov	ax,[bx+12]
+	neg	ax
+	mov	[bx+12],ax
+	call	ball_reset
+
+	; == Right: Collision if x + r >= 319
+bounce_right_wall:
+	mov	ax,[bx]	; x
+	mov	dx,[bx+14]	; r
+	add	ax,dx
+	cmp	ax,319
+	js	bounce_bottom_wall
+	; Negate rico_x
+	mov	ax,[bx+10]
+	neg	ax
+	mov	[bx+10],ax
+	call	ball_reset
+
+	; == Bottom: Collision if y + r >= 199
+bounce_bottom_wall:
+	mov	ax,[bx+2]	; y
+	mov	dx,[bx+14]	; r
+	add	ax,dx
+	cmp	ax,199
+	js	bounce_wall_end
+	; Negate rico_y
+	mov	ax,[bx+12]
+	neg	ax
+	mov	[bx+12],ax
+	call	ball_reset
+
+bounce_wall_end:
+	; Later there will be checking here for collisions with other balls
+	
+	; Get current position in the array back and move it to the next
+	; step of the iteration
+	pop	bx
+	add	bx,2
+	jmp	bounce_loop
+	
+
+done_all:
+
+	pop	dx
+	pop	cx
+	pop	bx
+	pop	ax
+	pop	bp
+	ret	2
+ball_bounce	endp
+
+; This function sets
+;	start_x = curr_x
+;	start_y = curr_y
+;	t = 0
+; Parameter (ball address) is in bx
+ball_reset	proc	near
+	push	ax
+	push	bx
+	; x
+	mov	ax,[bx]
+	mov	[bx+4],ax
+	; y
+	mov	ax,[bx+2]
+	mov	[bx+6],ax
+	; t
+	mov	ax,0
+	mov	[bx+8],ax
+	pop	bx
+	pop	ax
+	ret
+ball_reset	endp
 
 ; This one simply crashes it all, rewrite
 ball_move_n proc near
