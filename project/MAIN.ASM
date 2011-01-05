@@ -270,10 +270,11 @@ loop_draw_ball:
 	call	ball_bounce
 	
 	; Get keystroke
-	mov	ah,00h
+	mov	ah,01h
 	int	16h
-	cmp	al,'q'
-	jnz	loop_draw
+	jz	loop_draw
+	;cmp	al,'q'
+	;jnz	loop_draw
 
 	restorevideomode	oldvidmode
 .EXIT
