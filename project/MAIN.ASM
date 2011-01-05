@@ -22,6 +22,8 @@ endm
 ; Constants, these affect the settings of the compiled program.
 AMT_BALLS_MIN = 1
 AMT_BALLS_MAX = 5
+RADIUS_MIN = 1
+RADIUS_MAX = 30
 
 ; Don't change colour max and min
 COLOUR_MIN = 0
@@ -119,12 +121,12 @@ create_ball:
 	call	printint
 	call	newline
 	; Then we put it on the stack again, since we need it a bit further
-	push	bx ; We will need it again
+	push	bx	; We will need it again
 	mov	ax,18
 	mul	bl
 	add	ax,offset ary_balls_data
 	pop	bx
-	add	bx,bx ; offset times two since every block is 2 bytes!
+	add	bx,bx	; offset times two since every block is 2 bytes!
 	add	bx,offset ary_balls
 	mov	[bx],ax
 
@@ -147,8 +149,30 @@ create_ball:
 	; rico_y
 	mov	ax,10
 	push	ax
-	; radius
-	mov	ax,20
+
+	; Radius?
+get_radius:
+	lea	ax,msg_radius
+	push	ax
+	call	prints
+	call	newline
+	; Get input
+	mov	ax,offset input_buffer
+	push	ax
+	call	getline
+	call	newline
+	; to int
+	sub	sp,2	; return value
+	mov	ax,offset input_buffer
+	add	ax,2	; First 2 bytes aren't part of string
+	push	ax
+	call	stoi
+	pop	ax
+	; Check if it fits in the valid range
+	cmp	ax,RADIUS_MIN
+	js	get_radius
+	cmp	ax,RADIUS_MAX
+	jg	get_radius
 	push	ax
 	
 	; Colour? (0 to 255)
