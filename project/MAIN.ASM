@@ -172,16 +172,16 @@ create_ball:
 	; address
 	push	ax
 	; x
-	mov	ax,0
+	mov	ax,cx
 	push	ax
 	; y
-	mov	ax,0
+	mov	ax,cx
 	push	ax
 	; rico_x
-	mov	ax,1
+	mov	ax,cx
 	push	ax
 	; rico_y
-	mov	ax,1
+	mov	ax,cx
 	push	ax
 
 	; Radius?
@@ -248,11 +248,18 @@ get_colour:
 loop_draw:
 	blankscreenmode13
 	; Note that the address of ball n is at: ary_balls[2n]
-	mov	ax,ary_balls[0]
+	mov	bx,amt_balls
+	add	bx,amt_balls
+loop_draw_ball:
+	mov	ax,ary_balls[bx]
 	push	ax
 	call	ball_draw
 	push	ax
 	call	ball_move
+	
+	sub	bx,2
+	cmp	bx,0
+	jns	loop_draw_ball
 	
 	; Get keystroke
 	mov	ah,00h
