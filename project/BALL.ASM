@@ -209,9 +209,12 @@ iterdraw_x:
 	; Now to colour the dot. Notice that the colour is only 8 bit (unsigned)
 	mov	ax,[bp+4]
 	call	ball_get_c
-	; This is the segment of the screen
-	mov	dx,0A000h
+	; This is the segment of the buffer parameter
+	mov	dx,[bp+8]
 	mov	es,dx
+	; And the offset
+	mov	dx,[bp+6]
+	add	di,dx
 	; This moves the value in al to es:di
 	; Now the dot is coloured
 	stosb
@@ -235,7 +238,7 @@ draw_continue:
 	pop	bx
 	pop	ax
 	pop	bp
-	ret	2
+	ret	6
 ball_draw	endp
 
 

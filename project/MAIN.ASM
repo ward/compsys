@@ -28,19 +28,9 @@ blankscreenmode13 macro
 	push es
 	push di
 	;set target registers for stosb
-	mov ax,0A000h
+	mov ax,seg videobuffer
 	mov es,ax
-	xor di,di
-	;wait for vblank
-	mov dx, 03dah	; VGA status port                 
-blankscreenmode13_wait1:	;if in vblank, wait until vblank finishes
-	in al, dx
-	and al, 8
-	jnz blankscreenmode13_wait1	; busy wait
-blankscreenmode13_wait2:	;wait until begin of vblank
-	in al, dx
-	and al, 8
-	jz blankscreenmode13_wait2	; and again
+	mov di,offset videobuffer
 	;set fill color
 	mov al,0
 	mov cx,64000	;size of video ram
@@ -64,6 +54,9 @@ COLOUR_MIN = 0
 COLOUR_MAX = 255
 
 .STACK 1024
+
+.FARDATA
+videobuffer	db	64000 dup (0)
 
 .DATA
 ; Messages for user interaction
@@ -254,9 +247,16 @@ loop_draw:
 	add	bx,amt_balls
 	sub	bx,2	; Because indices start counting at 0
 loop_draw_ball:
+	; Parameters for ball_draw: bufferseg bufferadd ball
+	mov	ax,seg videobuffer
+	push	ax
+	mov	ax,offset videobuffer
+	push	ax
+	; Now get current ball
 	mov	ax,ary_balls[bx]
 	push	ax
 	call	ball_draw
+	; Current ball again
 	push	ax
 	call	ball_move
 	
@@ -269,6 +269,9 @@ loop_draw_ball:
 	push	ax
 	call	ball_bounce
 	
+	; Throw buffer to the screen
+	call	updatescreen
+
 	; Get keystroke
 	mov	ah,01h
 	int	16h
@@ -278,5 +281,44 @@ loop_draw_ball:
 
 	restorevideomode	oldvidmode
 .EXIT
+
+; Throws the videobuffer to the screen
+updatescreen	proc	near
+	push	ax
+	push	cx
+	push	dx
+	push	ds
+	push	es
+	push	di
+	push	si
+
+	;change registers for rep movsb to video ram
+	mov	dx,seg videobuffer
+	mov	ds,dx
+	mov	si,offset videobuffer
+	mov	dx,0A000h
+	mov	es,dx
+	xor	di,di
+	;wait for vblank to write to video ram
+	mov	dx, 03dah	; VGA status port
+updatescreen_wait1:	;if in vblank, wait until vblank finishes
+	in	al,dx
+	and	al,8
+	jnz	updatescreen_wait1	; busy wait
+updatescreen_wait2:	;wait until begin of vblank
+	in	al,dx
+	and	al,8
+	jz	updatescreen_wait2	; and again
+	mov	cx,64000
+	rep	movsb ;blit
+
+	pop	si
+	pop	di
+	pop	es
+	pop	ds
+	pop	dx
+	pop	cx
+	pop	ax
+updatescreen	endp
 
 end
