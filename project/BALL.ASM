@@ -213,7 +213,6 @@ iterdraw_x:
 	mov	es,dx
 	; This moves the value in al to es:di
 	; Now the dot is coloured
-	; TODO: Is there a need to wait for that vblank stuff? See examples.
 	stosb
 
 draw_continue:
@@ -238,7 +237,77 @@ draw_continue:
 	ret	2
 ball_draw	endp
 
-ball_move proc near
+
+; Moves the ball
+ball_move	proc	near
+	push	bp
+	mov	bp,sp
+	push	ax
+	push	bx
+	push	cx
+	push	dx
+
+	; Firstly, increase internal counter t
+	; Then, recalculate x and y
+	mov	bx,[bp+4]	; address of the ball
+	mov	dx,[bx+8]	; t
+	inc	dx
+	mov	[bx+8],dx
+	; Recalculate positions
+	push	bx
+	mov	ax,0	; for x
+	call	ball_calc_coor
+	push	bx
+	mov	ax,2	; for y
+	call	ball_calc_coor
+	
+
+	pop	dx
+	pop	cx
+	pop	bx
+	pop	ax
+	pop	bp
+	ret	2
+ball_move	endp
+
+; Private function, recalculates the mentioned coordinate
+; ax = 0 -> x
+; ax = 2 -> y
+; tos = balladdress
+ball_calc_coor	proc	near
+	push	bp
+	mov	bp,sp
+	push	ax
+	push	bx
+	push	cx
+	push	dx
+
+	mov	bx,[bp+4]
+	mov	dx,[bx+8]	; t
+	; the offset, further use of bx will differ between x and y
+	; Note, this heavily depends on the order of the data!
+	add	bx,ax
+	; Get rico
+	mov	ax,[bx+10]
+	imul	dx
+	; dx:ax now holds ax*cx = rico * t
+	; but due to limitations on the screen width and height as well
+	; as limitations on our rico, we only have to look at ax
+	; So we add the start position and save everything
+	mov	dx,[bx+4]
+	add	ax,dx
+	mov	[bx],ax
+
+	pop	dx
+	pop	cx
+	pop	bx
+	pop	ax
+	pop	bp
+	ret	2
+ball_calc_coor	endp
+
+; This one simply crashes it all, rewrite
+ball_move_n proc near
 	push bp
 	mov bp, sp
 	push ax
@@ -281,7 +350,7 @@ ball_continue:
 	pop bx
 	pop ax
 	pop bp
-ball_move	endp
+ball_move_n	endp
 
 check_ball_x proc near
 first:

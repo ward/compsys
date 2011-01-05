@@ -1,7 +1,7 @@
 .MODEL compact
 
 ; Macros
-
+; See examples 'Computersystemen'
 setvideomode macro NewMode,OldMode
 	;get current mode, set in al
 	mov ah,0Fh
@@ -17,6 +17,40 @@ restorevideomode macro OldMode
 	mov ah,00h
 	mov al,OldMode
 	int 10h
+endm
+
+blankscreenmode13 macro
+	local blankscreenmode13_wait1,blankscreenmode13_wait2
+	;store context
+	push ax
+	push cx
+	push dx
+	push es
+	push di
+	;set target registers for stosb
+	mov ax,0A000h
+	mov es,ax
+	xor di,di
+	;wait for vblank
+	mov dx, 03dah	; VGA status port                 
+blankscreenmode13_wait1:	;if in vblank, wait until vblank finishes
+	in al, dx
+	and al, 8
+	jnz blankscreenmode13_wait1	; busy wait
+blankscreenmode13_wait2:	;wait until begin of vblank
+	in al, dx
+	and al, 8
+	jz blankscreenmode13_wait2	; and again
+	;set fill color
+	mov al,0
+	mov cx,64000	;size of video ram
+	rep stosb	;blit
+	;restore context
+	pop di
+	pop es
+	pop dx
+	pop cx
+	pop ax
 endm
 
 ; Constants, these affect the settings of the compiled program.
@@ -61,14 +95,14 @@ extern	print:proto
 extern	prints:proto
 extern	newline:proto
 extern	getline:proto
+extern	printint:proto
 ; stoi
 extern	stoi:proto
 ; ball
 extern	ball_new:proto
 extern	ball_draw:proto
+extern	ball_move:proto
 
-; printint
-extern	printint:proto
 
 .STARTUP
 	; Perhaps add something to clear the screen?
@@ -138,16 +172,16 @@ create_ball:
 	; address
 	push	ax
 	; x
-	mov	ax,160
+	mov	ax,0
 	push	ax
 	; y
-	mov	ax,100
+	mov	ax,0
 	push	ax
 	; rico_x
-	mov	ax,10
+	mov	ax,1
 	push	ax
 	; rico_y
-	mov	ax,10
+	mov	ax,1
 	push	ax
 
 	; Radius?
@@ -209,41 +243,23 @@ get_colour:
 
 	; Try some drawing
 	setvideomode	13h,oldvidmode
-	
+
+	; DEBUG
+loop_draw:
+	blankscreenmode13
 	; Note that the address of ball n is at: ary_balls[2n]
 	mov	ax,ary_balls[0]
 	push	ax
 	call	ball_draw
-
-
-; draw a dot in bottom left corner
-	; Screen
-	mov	dx,0A000h
-	mov	es,dx
+	push	ax
+	call	ball_move
 	
-	xor	di,di
-	mov	di,320
-	mov	ax,199
-	mul	di
-	mov	di,ax
+	; Get keystroke
+	mov	ah,00h
+	int	16h
+	cmp	al,'q'
+	jnz	loop_draw
 
-	  ;wait for vblank to write to video ram
-  mov dx, 03dah ; VGA status port             
-drawscreen_wait1: ;if in vblank, wait until vblank finishes
-  in al, dx
-  and al, 8
-  jnz drawscreen_wait1                 ; busy wait
-drawscreen_wait2:                      ;wait until begin of vblank
-  in al, dx
-  and al, 8
-  jz drawscreen_wait2                  ; and again
-	mov	al,50
-	stosb ; stores al into es:di
-	
-	  ;wait for key pressed
-  xor ah,ah
-  int 16h
-	
 	restorevideomode	oldvidmode
 .EXIT
 
