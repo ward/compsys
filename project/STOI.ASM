@@ -93,7 +93,7 @@ finish:
 	ret	2
 stoi	endp
 
-; Local procedure to check if CHARACTER in dl is element of
+; Local procedure to check if CHARACTER in al is element of
 ; { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }
 ; Carry flag to 1 if notvalid
 ; Carry flag to 0 if valid
