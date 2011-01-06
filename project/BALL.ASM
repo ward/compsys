@@ -71,14 +71,13 @@ ball_new	proc	near
 ball_new	endp
 
 
-; Something here to grab the curr x etc from "inside"
 ; Interaction!
 ; eg: ball_get_x, ball_get_y, ball_get_r, ...
 ; Make them behave like this:
 ; Parameter (ball's address) in ax
 ; Call function
 ; Result in ax
-
+; These are more for public users of the Ball
 ball_get_x	proc	near
 	mov	bx,ax
 	mov	ax,[bx]
