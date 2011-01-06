@@ -43,6 +43,7 @@ clearvideobuffer macro
 endm
 
 ; Constants, these affect the settings of the compiled program.
+; You are advised not to change them, stability cannot be assured.
 AMT_BALLS_MIN = 1
 AMT_BALLS_MAX = 5
 RADIUS_MIN = 1
