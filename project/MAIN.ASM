@@ -19,8 +19,7 @@ restorevideomode macro OldMode
 	int 10h
 endm
 
-blankscreenmode13 macro
-	local blankscreenmode13_wait1,blankscreenmode13_wait2
+clearvideobuffer macro
 	;store context
 	push ax
 	push cx
@@ -101,7 +100,7 @@ extern	ball_bounce:proto
 
 .STARTUP
 	; Perhaps add something to clear the screen?
-	
+
 	; Ask for the amount of balls
 get_amt_balls:
 	lea	dx,msg_amt_balls
@@ -163,7 +162,7 @@ create_ball:
 	; the beginning defaults.
 	; Push every item onto the stack in the correct order,
 	; then call ball_new at the end of the iteration.
-	
+
 	; address
 	push	ax
 	; x
@@ -203,7 +202,7 @@ get_radius:
 	cmp	ax,RADIUS_MAX
 	jg	get_radius
 	push	ax
-	
+
 	; Colour? (0 to 255)
 get_colour:
 	lea	ax,msg_colour
@@ -228,10 +227,10 @@ get_colour:
 	cmp	ax,COLOUR_MAX
 	jg	get_colour
 	push	ax
-	
+
 	; And finally make the ball
 	call	ball_new
-	
+
 	; Looping till cx = 0
 	dec	cx
 	jnz	create_ball
@@ -239,9 +238,9 @@ get_colour:
 	; Try some drawing
 	setvideomode	13h,oldvidmode
 
-	; DEBUG
+
 loop_draw:
-	blankscreenmode13
+	clearvideobuffer
 	; Note that the address of ball n is at: ary_balls[2n] for n=0..amt-1
 	mov	bx,amt_balls
 	add	bx,amt_balls
