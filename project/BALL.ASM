@@ -116,37 +116,34 @@ ball_draw	proc	near
 	; Address of the ball can be found on bp+4
 
 	; Put radius^2 on the stack
-	mov	ax,[bp+4]
-	call	ball_get_r
+	mov	bx,[bp+4]	; Ball
+	mov	ax,[bx+14]	; Radius
 	; Radius is positive and we'll keep it below 128 so al is the same.
-	; Result in ax
 	mul	al
 	push	ax
 
 	; Get 2*radius (Note that this may need 2*r+1 instead), we'll see.
 	; This is the y to loop through
 	; We are assuming constraints on the radius size such that 2*r < 127
-	mov	ax,[bp+4]
-	call	ball_get_r
+	mov	ax,[bx+14]
 	mov	cx,ax
 	add	cx,cx
 iterdraw_y:
 	push	cx
 	; Get the beginvalue again, this represents our x to loop through
-	mov	ax,[bp+4]
-	call	ball_get_r
+	mov	bx,[bp+4]	; Ball
+	mov	ax,[bx+14]	; r
 	mov	cx,ax
 	add	cx,cx
 iterdraw_x:
 	; Do (r - x)^2
-	mov	ax,[bp+4]
-	call	ball_get_r
+	mov	bx,[bp+4]
+	mov	ax,[bx+14]
 	sub	al,cl
 	imul	al	; Result in ax !
 	mov	dx,ax
 	; Now (r - y)^2
-	mov	ax,[bp+4]
-	call	ball_get_r
+	mov	ax,[bx+14]	; Still r
 	mov	bx,sp
 	mov	bx,[bx]	; y was pushed on the stack at the begining of iter y!
 	sub	al,bl
@@ -172,11 +169,10 @@ iterdraw_x:
 	; First, let's get y_m + y - r
 	mov	bx,sp
 	mov	dx,[bx]	; y
-	mov	ax,[bp+4]
-	call	ball_get_y
+	mov	bx,[bp+4]
+	mov	ax,[bx+2]	; y_m
 	add	dx,ax	; y + y_m
-	mov	ax,[bp+4]
-	call	ball_get_r
+	mov	ax,[bx+14]
 	sub	dx,ax	; y + y_m - r in dx
 	; If negative, dont draw dot
 	js	draw_continue
@@ -192,11 +188,10 @@ iterdraw_x:
 
 	; Now we do x_m + x - r
 	mov	dx,cx	; x
-	mov	ax,[bp+4]
-	call	ball_get_x
+	mov	bx,[bp+4]	; Ball
+	mov	ax,[bx]	; x_m
 	add	dx,ax	; x + x_m
-	mov	ax,[bp+4]
-	call	ball_get_r
+	mov	ax,[bx+14]
 	sub	dx,ax	; x + x_m - r in dx
 	; If negative, skip
 	js	draw_continue
@@ -206,8 +201,8 @@ iterdraw_x:
 	add	di,dx
 
 	; Now to colour the dot. Notice that the colour is only 8 bit (unsigned)
-	mov	ax,[bp+4]
-	call	ball_get_c
+	mov	bx,[bp+4]	; Ball
+	mov	ax,[bx+16]	; Colour
 	; This is the segment of the buffer parameter
 	mov	dx,[bp+8]
 	mov	es,dx
