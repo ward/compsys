@@ -150,7 +150,7 @@ create_ball:
 	call	printint
 	call	newline
 	; Then we put it on the stack again, since we need it a bit further
-	push	bx	; We will need it again
+	push	bx
 	mov	ax,18
 	mul	bl
 	add	ax,offset ary_balls_data
@@ -166,8 +166,9 @@ create_ball:
 
 	; address
 	push	ax
-	; x
-	mov	ax,160
+	; x NEEDS TO BE RANDOM BUT NOT INTERFERING WITH OTHERS? same for rest
+	mov	ax,2*RADIUS_MAX
+	mul	cx
 	push	ax
 	; y
 	mov	ax,100
