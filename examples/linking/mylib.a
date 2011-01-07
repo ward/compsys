@@ -1,3 +1,0 @@
-InpSeg segment para public 'input'
-	externdef newline:far
-InpSeg ends
