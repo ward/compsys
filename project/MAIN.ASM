@@ -141,12 +141,14 @@ create_ball:
 	;	store at correct spot in ary_balls
 	mov	bx,amt_balls
 	sub	bx,cx
-	; bx now holds the number of the ball we are handling
+	; bx now holds the number of the ball we are handling (0 to n-1)
 	; Firstly we print it out as info to the user
 	mov	ax,offset msg_ball_n
 	push	ax
 	call	prints
-	push	bx
+	mov	ax,bx
+	inc	ax
+	push	ax
 	call	printint
 	call	newline
 	; Then we put it on the stack again, since we need it a bit further
