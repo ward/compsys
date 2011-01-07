@@ -8,7 +8,6 @@ public	ball_new
 public	ball_draw
 public  ball_move
 public	ball_bounce
-public  botsing
 
 .STACK 1024
 
@@ -401,8 +400,10 @@ bounce_ball_loop:
 	push	ax
 	call	ball_bounce_checkballs
 	jnc	nobounce
-	
 	; Now handle the bouncing of the two balls
+	push	dx
+	push	ax
+	call	balls_bounced
 	
 nobounce:
 	; Back to beginning of the loop
@@ -519,71 +520,43 @@ ball_bounce_checkballs_end:
 	ret	4	; 2 parameters
 ball_bounce_checkballs	endp
 
-; Does this work/do anything?
-botsing proc near
-	push bp
-	mov bp, sp
-	push ax
-	push bx
-	push cx
-	push dx
-	mov bx, [bp+6]
-	mov ax, [bx+2]  ;ax bevat de y-co van cirkel2
-	mov bx, [bp+4]
-	mov cx, [bx+2]  ;cx bevat de y-co van cirkel1
-	sub ax, cx      ;ax bevat y2-y1
-	mul ax          ;ax bevat (y2-y1)²
-	mov bx, [bp+6]
-	mov cx, [bx]    ;cx bevat de x-co van cirkel2
-	mov bx, [bp+4]
-	mov dx, [bx]    ;dx bevat de x-co van cirkel1
-	sub cx, dx      ;cx bevat x2-x1
-	mov dx, cx
-	mov cx, ax
-	mov ax, dx
-	mul ax          ;ax bevat (x2-x1)²
-	add cx, ax      ;cx bevat ((y2-y1)²+(x2-x1)²)
-	mov bx, [bp+4]
-	mov ax, [bx+14] ;ax bevat de straal van cirkel1
-	mov bx, [bp+6]
-	mov dx, [bx+14] ;dx bevat de straal van cirkel2
-	add ax, dx      ;ax bevat straal1 + straal2
-	mul ax          ;ax bevat (straal1 + straal2)²
-	cmp cx, ax      
-	jbe kleiner     ; ((y2-y1)²+(x2-x1)²) <= (r1 + r2)²
-	ja  groter
-kleiner:
-	mov bx, [bp+4]
-	mov cx, [bx+10]
-	neg cx          ;rico x van cirkel1 negatief maken
-	mov [bx+10], cx
-	mov cx, [bx+12]
-	neg cx          ;rico y van cirkel1 negatief maken
-	mov [bx+12], cx
-	mov cx, 0
-	mov [bx+8], cx  ;counter t van cirkel1 op 0 zetten
-	mov cx, [bx]
-	mov [bx+4], cx  ;start-x van cirkel1 veranderen met de huidige x
-	mov cx, [bx+2]
-	mov [bx+6], cx  ;start-y van cirkel1 veranderen met de huidige y
-	mov bx, [bp+6]
-	mov cx, [bx+10]
-	neg cx          ;rico x van cirkel2 negatief maken
-	mov [bx+10], cx
-	mov cx, [bx+12]
-	neg cx          ;rico y van cirkel2 negatief maken
-	mov [bx+12], cx
-	mov cx, 0
-	mov [bx+8], cx  ;counter t van cirkel2 op 0 zetten
-	mov cx, [bx]
-	mov [bx+4], cx  ;start-x van cirkel2 veranderen met de huidige x
-	mov cx, [bx+2]
-	mov [bx+6], cx  ;start-y van cirkel2 veranderen met de huidige y
-groter:
-	pop dx
-	pop cx
-	pop bx
-	pop ax
-	pop bp
-botsing	endp
+; Gives new route to the two balls
+; Gets two parameters from the stack: addresses of two balls
+balls_bounced	proc	near
+	push	bp
+	mov	bp,sp
+	push	ax
+	push	bx
+	push	cx
+	push	dx
+
+	; Temporarily just send back in opposite direction
+	mov	bx, [bp+4]
+	; rico_x_1
+	mov	cx, [bx+10]
+	neg	cx
+	mov	[bx+10], cx
+	; rico_y_1
+	mov	cx, [bx+12]
+	neg	cx
+	mov	[bx+12], cx
+	call	ball_reset
+	mov	bx, [bp+6]
+	; rico_x_2
+	mov	cx, [bx+10]
+	neg	cx
+	mov	[bx+10], cx
+	; rico_y_2
+	mov	cx, [bx+12]
+	neg	cx
+	mov	[bx+12], cx
+	call	ball_reset
+
+	pop	dx
+	pop	cx
+	pop	bx
+	pop	ax
+	pop	bp
+	ret	4	; 2 parameters
+balls_bounced	endp
 end

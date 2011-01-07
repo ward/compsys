@@ -47,7 +47,7 @@ endm
 AMT_BALLS_MIN = 1
 AMT_BALLS_MAX = 5
 RADIUS_MIN = 1
-RADIUS_MAX = 30
+RADIUS_MAX = 20
 
 ; Don't change colour max and min
 COLOUR_MIN = 0
@@ -141,16 +141,18 @@ create_ball:
 	;	store at correct spot in ary_balls
 	mov	bx,amt_balls
 	sub	bx,cx
-	; bx now holds the number of the ball we are handling
+	; bx now holds the number of the ball we are handling (0 to n-1)
 	; Firstly we print it out as info to the user
 	mov	ax,offset msg_ball_n
 	push	ax
 	call	prints
-	push	bx
+	mov	ax,bx
+	inc	ax
+	push	ax
 	call	printint
 	call	newline
 	; Then we put it on the stack again, since we need it a bit further
-	push	bx	; We will need it again
+	push	bx
 	mov	ax,18
 	mul	bl
 	add	ax,offset ary_balls_data
@@ -166,8 +168,9 @@ create_ball:
 
 	; address
 	push	ax
-	; x
-	mov	ax,160
+	; x NEEDS TO BE RANDOM BUT NOT INTERFERING WITH OTHERS? same for rest
+	mov	ax,2*RADIUS_MAX
+	mul	cx
 	push	ax
 	; y
 	mov	ax,100
