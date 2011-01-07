@@ -47,7 +47,7 @@ endm
 AMT_BALLS_MIN = 1
 AMT_BALLS_MAX = 5
 RADIUS_MIN = 1
-RADIUS_MAX = 30
+RADIUS_MAX = 20
 
 ; Don't change colour max and min
 COLOUR_MIN = 0
