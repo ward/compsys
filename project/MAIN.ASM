@@ -319,6 +319,7 @@ updatescreen_wait2:	;wait until begin of vblank
 	pop	dx
 	pop	cx
 	pop	ax
+	ret
 updatescreen	endp
 
 end
