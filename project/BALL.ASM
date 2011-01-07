@@ -381,7 +381,34 @@ bounce_bottom_wall:
 	call	ball_reset
 
 bounce_wall_end:
-	; Later there will be checking here for collisions with other balls
+	; Now to check and handle collisions with other balls
+	; The address in bx is the ball we are at, not the index!
+	; Keep the address of the ball in dx, we'll need it in a bit
+	mov	dx,bx
+	; Get the index from tos (and put back because we still need it)
+	pop	bx
+	push	bx
+	; Now loop till we reach 0000
+bounce_ball_loop:
+	add	bx,2
+	mov	ax,[bx]
+	cmp	ax,0
+	jz	bounce_ball_end
+	; ax and dx are the two address of the balls
+	; We'll push them on the stack and call function to check
+	; if they're too close
+	push	dx
+	push	ax
+	call	ball_bounce_checkballs
+	jnc	nobounce
+	
+	; Now handle the bouncing of the two balls
+	
+nobounce:
+	; Back to beginning of the loop
+	jmp	bounce_ball_loop
+
+bounce_ball_end:
 	
 	; Get current position in the array back and move it to the next
 	; step of the iteration
@@ -421,6 +448,76 @@ ball_reset	proc	near
 	pop	ax
 	ret
 ball_reset	endp
+
+; Gets two arguments via the stack
+; Address of first and second ball
+; If two balls collide, carry flag is set
+; Otherwise, carryflag is clear
+ball_bounce_checkballs	proc	near
+	push	bp
+	mov	bp,sp
+	push	ax
+	push	bx
+	push	cx
+	push	dx
+
+	; Get data for the first ball
+	mov	bx,[bp+6]	; ball 1
+	mov	ax,[bx]	; x_1
+	mov	dx,[bx+2]	; y_1
+	mov	cx,[bx+14]	; r_1
+	; And the second
+	mov	bx,[bp+4]	; ball 2
+	; We'll immediately take the absolute value
+	sub	ax,[bx]	; x_1 - x_2
+	jns	xdiff_pos
+	neg	ax
+xdiff_pos:
+	sub	dx,[bx+2]	; y_1 - y_2
+	jns	ydiff_pos
+	neg	dx
+ydiff_pos:
+	add	cx,[bx+14]	; r_1 + r_2
+	; To avoid multiplying too big numbers, we check
+	; | x_1 - x_2 | > r_1 + r_2
+	cmp	ax,cx
+	jg	balls_dont_collide
+	; | y_1 - y_2 | > r_1 + r_2
+	cmp	dx,cx
+	jg	balls_dont_collide
+
+	; Now both sides are in a "normal" range
+	mul	ax	; (|x_1 - x_2|)^2
+	; swap ax and dx to square the y's
+	push	ax
+	mov	ax,dx
+	pop	dx
+	mul	ax	; (|y_1 - y_2|)^2
+	add	dx,ax	; (|x_1 - x_2|)^2 + (|y_1 - y_2|)^2
+	; Now finally the r's
+	mov	ax,cx
+	mul	ax
+	; (r_1 + r_2)^2 ??? (|x_1 - x_2|)^2 + (|y_1 - y_2|)^2
+	cmp	ax,dx
+	; <
+	js	balls_dont_collide
+	; >=
+	; or in other words, they collide. Set carry flag
+	stc
+	jmp	ball_bounce_checkballs_end
+
+balls_dont_collide:
+	; Clear carry flag
+	clc
+
+ball_bounce_checkballs_end:
+	pop	dx
+	pop	cx
+	pop	bx
+	pop	ax
+	pop	bp
+	ret	4	; 2 parameters
+ball_bounce_checkballs	endp
 
 ; Does this work/do anything?
 botsing proc near
