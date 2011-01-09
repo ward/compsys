@@ -59,29 +59,36 @@ random endp
 ;x(n+1)=(a*x(n)+b) mod m + straal, a=16333, b=25887, m=2^8, range between straal and 256 + straal, for x
 ;                                                    m=2^7, range between straal and 128 + straal, for y
 ;                                                    laagste getal moet de lengte van de straal zijn want anders ligt ons bal buiten de grenzen
-random2 proc near
+randomint proc near
 a=16333
 b=25887
     push bp
     mov bp,sp
     push bx
+    push cx
     push dx
-    mov ax,randomnumber
-    mov bx, [bp+...] ;aanpassen
-    ;times a
+    mov ax, [bp+4] ;maximum
+    mov cx, [bp+6] ;minimum
+    sub ax, cx  ;maximum - minimum
+    mov cx, 1
+    sub ax, cx
+    push ax 
+    mov ax, [bp+8]
+    ;maal a
     mov dx,a
     mul dx
-    ;add b
-    add ax,b ;no need for adc, bits will be lost anyway
-    ;mask 8 first bits to perform mod 2^8
-    and ax,00FFh
-    mov dx, [bx+14]
-    add ax, dx
-    mov randomnumber,ax
+    ;plus b
+    add ax,b
+    pop dx ; cx= maximum - minimum
+    and ax, dx   ;mod (maximum - minimum), geeft een getal tussen 0 en maximum - minimum - 1
+    mov cx, 1
+    add ax, cx   ;dus 1 optellen
+    mov cx, [bp+6]
+    add ax, cx
     ;done
     pop dx
+    pop cx
     pop bx
     pop bp
     ret
-random2 endp
-end
+randomint endp
